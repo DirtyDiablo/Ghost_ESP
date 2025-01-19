@@ -4,15 +4,17 @@ on:
   workflow_dispatch:
     inputs:
       board_type:
-        description: 'ESP32 Board Type'
-        required: true
-        type: choice
-        options:
-          - esp32
-          - esp32s2
-          - esp32s3
-          - esp32c3
-          - esp32c6
+  description: 'ESP32 Board Type'
+  required: true
+  type: choice
+  options:
+    - esp32
+    - esp32s2
+    - esp32s3
+    - esp32c3
+    - esp32c6
+  default: 'esp32s2'
+
       display_type:
         description: 'Display Configuration'
         required: true
@@ -50,8 +52,6 @@ on:
         type: choice
         options:
           - 4MB
-          - 8MB
-          - 16MB
         default: '4MB'
 
 jobs:
@@ -66,20 +66,14 @@ jobs:
       - name: Validate Configuration
         run: |
           # Board-Display Compatibility Check
-          case "${{ github.event.inputs.display_type }}" in
-            "ESP32-S3-Cardputer"|"LillyGoTWatch_S3"|"Waveshare_LCD"|"Crowtech_LCD")
-              if [ "${{ github.event.inputs.board_type }}" != "esp32s3" ]; then
-                echo "Error: ${{ github.event.inputs.display_type }} requires ESP32-S3 board type"
-                exit 1
-              fi
-              ;;
-            "MarauderV4_FlipperHub"|"MarauderV6_AwokDual"|"AwokMini"|"CYD2USB"|"CYDMicroUSB"|"CYDDualUSB"|"CYD2USB2.4_Inch")
-              if [ "${{ github.event.inputs.board_type }}" != "esp32" ]; then
-                echo "Error: ${{ github.event.inputs.display_type }} requires ESP32 board type"
-                exit 1
-              fi
-              ;;
-          esac
+case "${{ github.event.inputs.display_type }}" in
+  "MarauderV4_FlipperHub"|"MarauderV6_AwokDual"|"AwokMini"|"CYD2USB"|"CYDMicroUSB"|"CYDDualUSB"|"CYD2USB2.4_Inch")
+    if [ "${{ github.event.inputs.board_type }}" != "esp32" ] && [ "${{ github.event.inputs.board_type }}" != "esp32s2" ]; then
+      echo "Error: ${{ github.event.inputs.display_type }} requires ESP32 or ESP32-S2 board type"
+      exit 1
+    fi
+    ;;
+esac
 
           # Flash Size Validation
           case "${{ github.event.inputs.display_type }}" in
